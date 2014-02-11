@@ -3,16 +3,10 @@
 
 #include "stdio.h"
 #include "stdlib.h"
+#include "base.h"
 
 //设置结构体2个字节对齐，下面的结构体就可以和实际内存一一对应了，否则文件头sizeof()=16
 #pragma pack(2)
-
-/*定义UCHAR为一个字节的类型*/
-typedef unsigned char UCHAR;
-/*定义WORD为两个字节的类型*/
-typedef unsigned short WORD;
-/*定义DWORD为e四个字节的类型*/
-typedef unsigned long DWORD;
 
 /*位图文件头*/
 typedef struct BMP_FILE_HEADER
@@ -53,13 +47,13 @@ typedef struct RGB_QUAD
 typedef unsigned char UCHAR;
 
 //函数声明
-UCHAR **allloc_mem(int height, int width);
-void delete_mem(UCHAR **mem, int height, int width);
-int readBmp(UCHAR **image, int height, int width, char *filename);
-void displayImg(UCHAR **image, int height, int width);
-int saveImg(UCHAR **image, int height, int width, char *filename);
-void test(UCHAR *image);
-UCHAR BGR2GRAY(UCHAR a, UCHAR b, UCHAR c);
+UCHAR **allloc_mem2d(int height, int width);	//给二维数组分配空间
+void delete_mem2d(UCHAR **mem, int height, int width);		//销毁二维数组空间
+int readBmp(UCHAR **image, int height, int width, char *filename);		//读取24位BMP文件
+void displayImg(UCHAR **image, int height, int width);			//在cmd里显示图像，过大则放缩到64*64
+int saveImg(UCHAR **image, int height, int width, char *filename);		//存储图像数组为txt格式，过大则放缩到128*128
+void test(UCHAR *image);	//测试函数
+UCHAR BGR2GRAY(UCHAR a, UCHAR b, UCHAR c);		//BGR转换为GRAY
 
 
 #endif

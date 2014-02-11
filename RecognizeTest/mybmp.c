@@ -2,7 +2,7 @@
 #include "mybmp.h"
 
 //给二维数组分配内存空间，用来保存图像
-UCHAR **allloc_mem(int height, int width)
+UCHAR **allloc_mem2d(int height, int width)
 {
 	UCHAR **img;
 	int i = 0;
@@ -23,7 +23,7 @@ UCHAR **allloc_mem(int height, int width)
 }
 
 //释放二维数组占用的内存空间，若直接用free(mem)会造成内存泄露
-void delete_mem(UCHAR **mem, int height, int width)
+void delete_mem2d(UCHAR **mem, int height, int width)
 {
 	int i;
 
@@ -120,18 +120,23 @@ int readBmp(UCHAR **image, int height, int width, char *filename)
 void displayImg(UCHAR **image, int height, int width)
 {
 	int i,j;
-	int adjust = 1;
+	int adjust1 = 1, adjust2 = 1;
 
 	if (width > 64)
 	{
-		adjust = width/64;
+		adjust1 = width/64;
 	}
 
-	for (i = 0; i<height; i++)
+	if (height >64)
 	{
-		for (j = 0; j<width; j = j+adjust)	//这里跳点采样，以适合cmd显示
+		adjust2 = height/64;
+	}
+
+	for (i = 0; i<height; i = i+adjust2)
+	{
+		for (j = 0; j<width; j = j+adjust1)	//这里跳点采样，以适合cmd显示
 		{
-			if (image[i][j] == 0)
+			if (0 == image[i][j] )
 			{
 				printf("%c",0);
 			}
@@ -149,25 +154,37 @@ int saveImg(UCHAR **image, int height, int width, char *filename)
 {
 	FILE *fp = NULL;
 	int i, j, k = 0;
-	int adjust = 1;
+	int adjust1 = 1,adjust2 = 1;
+	//UCHAR c
 
 	if (width > 128)
 	{
-		adjust = width/128;		//确定跳点采样比例
+		adjust1 = width/128;		//确定跳点采样比例
 	}
-	//UCHAR c;
+	
+	if (height>128)
+	{
+		adjust2 = height/128;
+	}
 
 	fp = fopen(filename,"w");
 
 	//fwrite(image, sizeof(UCHAR), 64*64, fp);
 
-	for (i = 0; i<height; i++)
+	for (i = 0; i<height; i = i+adjust2)
 	{
-		for (j = 0; j<width; j = j+adjust)
+		for (j = 0; j<width; j = j+adjust1)
 		{
 			//输出到文件
+			if (0 == image[i][j] )
+			{
+				fputc(0, fp);
+			}
+			else
+			{
+				fputc(2, fp);
+			}
 			
-			(image[i][j] == 0)?fputc(0, fp):fputc(2, fp);
 			k++;
 		}
 		//一行完成，换行
