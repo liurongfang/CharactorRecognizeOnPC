@@ -15,10 +15,14 @@
 //矩形结构的定义
 typedef struct Rct
 {
-	int lefttopX;
-	int lefttopY;
-	int rightbottomX;
-	int rightbottomY;
+	int X1;		//左上角X和Y坐标
+	int Y1;
+	int X2;		//右下角X和Y坐标
+	int Y2;
+	//int lefttopX;
+	//int lefttopY;
+	//int rightbottomX;
+	//int rightbottomY;
 	// int leftbottomX;
 	// int leftbottomY;
 	// int righttopX;
@@ -38,6 +42,15 @@ Return: 正常返回值 0
 Date: 2014/01/29 
 *************************************************/
 int DetectRect(UCHAR **Dst, UCHAR **Src, int srcHeight, int srcWidth);
+
+
+
+void SlopeAdjust(UCHAR **Dst, UCHAR **Src, int srcHeight, int srcWidth);
+
+//归一化单个字符到指定宽和高
+void StdImage(UCHAR **Dst, UCHAR **Src, int srcHeight, int srcWidth, int dstHeight, int dstWidth);
+
+void TZTQ(UCHAR **Dst, UCHAR **Src, int srcHeight, int srcWidth);
 
 /*************************************************
 Function: detectNum()

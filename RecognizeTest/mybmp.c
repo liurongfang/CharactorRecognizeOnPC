@@ -136,14 +136,16 @@ void displayImg(UCHAR **image, int height, int width)
 	{
 		for (j = 0; j<width; j = j+adjust1)	//这里跳点采样，以适合cmd显示
 		{
-			if (0 == image[i][j] )
+			/*if (0 == image[i][j] )
 			{
 				printf("%c",0);
 			}
 			else
 			{
 				printf("%c",2);
-			}
+			}*/
+
+			printf("%d",image[i][j]);
 		}
 		printf("\n");
 	}
@@ -157,14 +159,14 @@ int saveImg(UCHAR **image, int height, int width, char *filename)
 	int adjust1 = 1,adjust2 = 1;
 	//UCHAR c
 
-	if (width > 128)
+	if (width > 64)
 	{
-		adjust1 = width/128;		//确定跳点采样比例
+		adjust1 = width/64;		//确定跳点采样比例
 	}
 	
-	if (height>128)
+	if (height > 64)
 	{
-		adjust2 = height/128;
+		adjust2 = height/64;
 	}
 
 	fp = fopen(filename,"w");
