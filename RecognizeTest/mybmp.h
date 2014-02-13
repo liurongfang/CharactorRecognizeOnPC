@@ -48,6 +48,7 @@ typedef unsigned char UCHAR;
 
 //函数声明
 UCHAR **allloc_mem2d(int height, int width);	//给二维数组分配空间
+int init_mem2d(UCHAR **img, int height, int width, UCHAR tag);		//初始化二维数组
 void delete_mem2d(UCHAR **mem, int height, int width);		//销毁二维数组空间
 int readBmp(UCHAR **image, int height, int width, char *filename);		//读取24位BMP文件
 void displayImg(UCHAR **image, int height, int width);			//在cmd里显示图像，过大则放缩到64*64

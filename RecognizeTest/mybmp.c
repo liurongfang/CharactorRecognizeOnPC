@@ -22,6 +22,23 @@ UCHAR **allloc_mem2d(int height, int width)
 	return (img);
 }
 
+//初始化二维数组
+int init_mem2d(UCHAR **img, int height, int width, UCHAR tag)
+{
+	int i,j;
+
+	for (i = 0; i<height; i++)
+	{
+		for (j = 0; j<width; j++)
+		{
+			img[i][j] = tag;
+		}
+		
+	}
+
+	return 0;
+}
+
 //释放二维数组占用的内存空间，若直接用free(mem)会造成内存泄露
 void delete_mem2d(UCHAR **mem, int height, int width)
 {
@@ -35,6 +52,7 @@ void delete_mem2d(UCHAR **mem, int height, int width)
 	free(mem);
 	mem = NULL;
 }
+
 //读取图像
 int readBmp(UCHAR **image, int height, int width, char *filename)
 {
@@ -145,10 +163,12 @@ void displayImg(UCHAR **image, int height, int width)
 				printf("%c",2);
 			}*/
 
-			printf("%d",image[i][j]);
+			printf("%2d ",image[i][j]);
 		}
 		printf("\n");
 	}
+
+	system("pause");
 }
 
 //保存图像到TXT文件
@@ -157,16 +177,17 @@ int saveImg(UCHAR **image, int height, int width, char *filename)
 	FILE *fp = NULL;
 	int i, j, k = 0;
 	int adjust1 = 1,adjust2 = 1;
+	int count = 128;
 	//UCHAR c
 
-	if (width > 64)
+	if (width > count)
 	{
-		adjust1 = width/64;		//确定跳点采样比例
+		adjust1 = width/count;		//确定跳点采样比例
 	}
 	
-	if (height > 64)
+	if (height > count)
 	{
-		adjust2 = height/64;
+		adjust2 = height/count;
 	}
 
 	fp = fopen(filename,"w");
@@ -193,7 +214,10 @@ int saveImg(UCHAR **image, int height, int width, char *filename)
 		fputc('\n',fp);
 	}
 
+	//printf("高度:%d & 宽度:%d",i/adjust2,j/adjust1);
+
 	//printf("调用saveImg()保存完成，像素点：%d个\n",k);
+	//system("pause");
 
 	fclose(fp);
 

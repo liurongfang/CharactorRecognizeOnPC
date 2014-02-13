@@ -12,6 +12,10 @@
 #include "stdio.h"
 #include "base.h"
 
+//标准化宽和高
+#define STD_W 8
+#define STD_H 16
+
 //矩形结构的定义
 typedef struct Rct
 {
@@ -30,86 +34,58 @@ typedef struct Rct
 }DRect;
 
 
+//建立矩形链表单元
+typedef struct rectLink
+{
+	DRect data;
+	struct rectLink *next;
+}RectLink;
 
-/*************************************************
-Function: detectRect()
-Description: 粗略分离出字符所在的矩形区域
-Calls: // 被本函数调用的函数清单
-Called By: // 调用本函数的函数清单
-Input: Scr 指向源图像的指针，srcWidth 源图像的宽度，srcHeight 指向源图像的高度
-Output: Dst 目标图像的指针
-Return: 正常返回值 0
-Date: 2014/01/29 
-*************************************************/
-int DetectRect(UCHAR **Dst, UCHAR **Src, int srcHeight, int srcWidth);
+//一下三个函数均在mybmp.h中定义并在mybmp中实现
+extern UCHAR **allloc_mem2d(int height, int width);
+extern void delete_mem2d(UCHAR **mem, int height, int width);
+extern void displayImg(UCHAR **image, int height, int width);
 
+//创建长度为num的单向矩形链表
+RectLink *CreateRectLink(int num);
 
+//用给定的DRect初始化矩形链表
+int InitRectLink(RectLink *head, DRect rect);
 
+//销毁链表
+int DeRectLink(RectLink *head);
+
+//显示得到的矩形链表
+void ShowRectLink(RectLink *rlink);
+
+//粗略分离出字符所在的矩形区域
+DRect DetectRect(UCHAR **Dst, UCHAR **Src, int srcHeight, int srcWidth);
+
+//倾斜度矫正
 void SlopeAdjust(UCHAR **Dst, UCHAR **Src, int srcHeight, int srcWidth);
 
 //归一化单个字符到指定宽和高
-void StdImage(UCHAR **Dst, UCHAR **Src, int srcHeight, int srcWidth, int dstHeight, int dstWidth);
+int StdAlignImg(UCHAR **Dst, UCHAR **Src, int dstHeight, int dstWidth, int srcHeight, int srcWidth, RectLink *rlink, int num);
 
-void TZTQ(UCHAR **Dst, UCHAR **Src, int srcHeight, int srcWidth);
+//标准化图像
+int StandardImg(UCHAR **Dst, UCHAR **Src, DRect dstRect, DRect srcRect);
 
-/*************************************************
-Function: detectNum()
-Description: 分离出单个字符组成的数组
-Calls: // 被本函数调用的函数清单
-Called By: // 调用本函数的函数清单
-Input: Scr 指向源图像的指针，srcWidth 源图像的宽度，srcHeight 指向源图像的高度
-Output: Dst 目标图像的指针
-Return: 正常返回值 0
-Date: 2014/01/29 
-*************************************************/
-int DetectNum(UCHAR **Dst[], UCHAR **Src, int srcHeight, int srcWidth , int num);
+//特征提取，13个特征
+int TZTQ13(UCHAR **tz, UCHAR **Src, int srcHeight, int srcWidth, RectLink *rlink, int num);
 
-/*************************************************
-Function: InvertImg()
-Description: 将图像反相，0变成1,1变成0
-Calls: // 被本函数调用的函数清单
-Called By: // 调用本函数的函数清单
-Input: Scr 指向源图像的指针，srcWidth 源图像的宽度，srcHeight 指向源图像的高度
-Output: Dst 目标图像的指针
-Return: 正常返回值 0
-Date: 2014/01/29 
-*************************************************/
+//分离出单个字符组成的数组
+RectLink *DetectNum(UCHAR **Src, int srcHeight, int srcWidth , int num);
+
+//将图像反相，0变成1,1变成0
 void InvertImg(UCHAR **Dst, UCHAR **Src , int srcHeight, int srcWidth);
 
-/*************************************************
-Function: SetImg()
-Description: 将图像的像素值全部置为tag
-Calls: // 被本函数调用的函数清单
-Called By: // 调用本函数的函数清单
-Input: Dst 指向源图像的指针，tag 要置的值
-Output: Dst 目标图像的指针
-Return: 正常返回值 0
-Date: 2014/01/29 
-*************************************************/
-int SetImg(UCHAR **Dst, int srcHeight, int srcWidth, int tag);
+//将图像的像素值全部置为tag
+int SetImg(UCHAR **Dst, int srcHeight, int srcWidth, UCHAR tag);
 
-/*************************************************
-Function: BinaryImg()
-Description: 将图像二值化
-Calls: // 被本函数调用的函数清单
-Called By: // 调用本函数的函数清单
-Input: Src 指向源图像的指针，thres 阈值
-Output: Dst 目标图像的指针
-Return: 正常返回值 0
-Date: 2014/01/29 
-*************************************************/
+//将图像二值化
 int BinaryImg(UCHAR **Dst, UCHAR **Src, int srcHeight, int srcWidth,  int thres);
 
-/*************************************************
-Function: Template()
-Description:  对图像进行模板操作
-Calls: // 被本函数调用的函数清单
-Called By: // 调用本函数的函数清单
-Input: Src 指向源图像的指针，srcWidth 源图像的宽度，srcHeight 源图像的高度，tepl 模板数组，size 模板大小，fac 系数
-Output: Dst 目标图像的指针
-Return: 正常返回值 0
-Date: 2014/01/29 
-*************************************************/
+//对图像进行模板操作
 int Template(UCHAR **Dst, UCHAR **Src, int srcHeight, \
 			 int srcWidth, UCHAR **tepl, int size, double fac);
 

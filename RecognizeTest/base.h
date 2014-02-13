@@ -16,8 +16,8 @@
 //#define assert(x) ( (x)?():(return))
 
 
-#define TRUE (0)
-#define FALSE (-1)
+#define TRUE (-1)		//C语言规定，0为假，非0为真，所以这里这样定义
+#define FALSE (0)
 
 
 //基本数据类型定义
