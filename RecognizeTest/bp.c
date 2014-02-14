@@ -2,14 +2,56 @@
 #include "base.h"
 #include "bp.h"
 
-//¼¤»îº¯Êı£ºSĞÍº¯Êı[-1,1]->[0,1]
-double squash(double sum)
+//·ÖÅä¶şÎ¬Êı×éÄÚ´æ
+double **allloc_mem2d_dbl(int height, int width)
 {
-	return 1/(1+exp(-sum));
+	int i;
+	double **mem = (double **)malloc(sizeof(double *)*height);
+
+	for (i = 0; i<height; i++)
+	{
+		mem[i] = (double *)malloc(sizeof(double )*width);
+	}
+
+	return (mem);
+}
+
+//ÊÍ·Å¶şÎ¬Êı×éÄÚ´æ
+int **detect_mem2d_dbl(double **mem, int height, int width)
+{
+	int i = 0;
+
+	for (i = 0; i<height; i++)
+	{
+		free(mem[i]);
+	}
+	free(mem);
+
+	return 0;
+}
+
+//¼¤»îº¯Êı£ºSĞÍº¯Êı[-1,1]->[0,1]
+double squash(double x)
+{
+	return 1/(1+exp(-x));
+}
+
+//³õÊ¼»¯È¨Öµ¾ØÕó
+void InitWeight(double **weight, int n2, int n1, double v)
+{
+	int i, j;
+
+	for (i = 0; i<n2; i++)
+	{
+		for (j = 0; j<n1; j++)
+		{
+			weight[i][j] = v;
+		}
+	}
 }
 
 
-//¶ÔÍ¼Ïñ½øĞĞÄ£°å²Ù×÷
+//ĞÅºÅÇ°Ïò´«²¥£¬lay1 -> lay2
 int ForwardLayer(double *lay1, double *lay2, double **connWeight, int n1, int n2)		//Ç°Ïò´«²¥
 {
 	int i,j;
@@ -37,7 +79,7 @@ int ForwardLayer(double *lay1, double *lay2, double **connWeight, int n1, int n2
 int CalcOutError(double *delta, double *output, double *target, int n)			//Êä³ö²ãÎó²î¼ÆËã
 {
 	int i;
-	double o,t,m_delta;
+	double o,m_delta;
 
 	for (i = 1; i<=n; i++)
 	{
@@ -50,36 +92,33 @@ int CalcOutError(double *delta, double *output, double *target, int n)			//Êä³ö²
 }
 
 
-//¼ÆËãÒşº¬²ãÎó²î
+//¼ÆËãÒşº¬²ãÎó²î£¬Ò²Îª·´Ïò´«²¥
 //delta_h Òşº¬²ãÎó²îÊı×é£¬n_h Òşº¬²ã½ÚµãÊı£¬delta_o Êä³ö²ãÎó²îÊı×é£¬n_o Êä³ö²ã½Úµã¸öÊı£¬weight Á¬½ÓÈ¨ÖµÊı×é£¬hidden Òşº¬²ã½ÚµãÊı×é
-void CalcHiddErr(double *delta_h, int n_h, double *delta_o, \
-				 int n_o, double **weight, double *hidden)			//Òşº¬²ãÎó²î¼ÆËã
+void CalcHiddErr(double *delta_h, int n_h, double *delta_o, int n_o, double **weight, double *hidden)			//Òşº¬²ãÎó²î¼ÆËã
 {
 	int i, j;
 	double h, errsum;
 
 	//¶ÔÒşº¬²ãµÄÃ¿¸ö½Úµã£¬¼ÆËã¼ÓÈ¨Îó²îºÍ
-	for (i = 1; i<=n_h; i++)
+	for (j = 1; j<=n_h; j++)
 	{
 		errsum = 0.0;
-		h = hidden[i];
+		h = hidden[j];
 
-		for (j = 1; j<=n_o; j++)
+		for (i = 1; i<=n_o; j++)
 		{
-			errsum += delta_o[j] * weight[j][i];		//·´Ïò´«²¥£ºÊä³ö½ÚµãÎó²î * Á¬½ÓÈ¨Öµ
+			errsum += delta_o[i] * weight[i][j];		//·´Ïò´«²¥£ºÊä³ö½ÚµãÎó²î * Á¬½ÓÈ¨Öµ
 		}
 
 		delta_h[j] = h * (1.0 - h) * errsum;
 	}
 
-	return 0;
 }
 
 //¸ù¾İµ±Ç°²ã½ÚµãÖµ¡¢¼ÆËãÎó²îºÍÇ°Ò»²ã½ÚµãÖµ£¬ĞŞÕıÁ¬½ÓÈ¨
 //delta µ±Ç°²ãÎó²îÊı×é£¬n_delta µ±Ç°²ã½ÚµãÊı£¬forwd Ç°Ò»²ãÎó²îÊı×é£¬n_fo Ç°Ò»²ã½Úµã¸öÊı£¬
 //		weight Á¬½ÓÈ¨ÖµÊı×é£¬oldw ¾ÉÁ¬½ÓÈ¨Êı×é£¬lrate Ñ§Ï°ÂÊ£¬momentum ¶¯Á¿Òò×Ó
-void AdjustWeight(double *delta, int n_delta, double *forwd, int n_fo, \
-				  double **weight, double **oldw, double lrate, double momentum)		//Îó²î·´Ïò´«²¥£¬µ÷ÕûÈ¨Öµ
+void AdjustWeight(double *delta, int n_delta, double *forwd, int n_fo, double **weight, double **oldw, double lrate, double momentum)		//Îó²î·´Ïò´«²¥£¬µ÷ÕûÈ¨Öµ
 {
 	int i, j;
 	double new_w = 0;	//±£´æÏÂÒ»¸öÈ¨Öµ
@@ -97,87 +136,318 @@ void AdjustWeight(double *delta, int n_delta, double *forwd, int n_fo, \
 	}
 }
 
+//±£´æÈ¨Öµ
+void w_weight(double **w,int n1,int n2,char*name)
+{
+	int i,j;
+	double *buffer;
+	FILE *fp;
+	fp = fopen(name, "wb+");
+	buffer=(double*)malloc((n1+1)*(n2+1)*sizeof(double));
+	for(i = 0; i<=n1; i++)
+	{
+		for(j=0; j<=n2; j++)
+		{
+			buffer[i*(n2+1) + j] = w[i][j];		//°ÑÈ¨ÖµËÍÈëbuffer
+		}
+	}
+	fwrite((char*)buffer,sizeof(double),(n1+1)*(n2+1),fp);
+	fclose(fp);
+	free(buffer);
+}
 
-//ÑµÁ·Éñ¾­ÍøÂç
-int TrainBpNet(double preci, int num)	//ÑµÁ·BPÉñ¾­ÍøÂç
+
+
+//¶ÁÈ¡È¨Öµ
+int  r_weight(double **w,int n1,int n2,char *name)
+{
+	int i,j;
+	double *buffer;
+	FILE *fp;
+
+	if((fp=fopen(name,"rb"))==NULL)
+	{
+		fprintf(stderr, "ÎŞ·¨¶ÁÈ¡È¨ÖµĞÅÏ¢");
+		return -1;
+	}
+
+	buffer=(double*)malloc((n1+1)*(n2+1)*sizeof(double));
+
+	//´ÓÎÄ¼ş¶ÁÈ¡
+	fread((char*)buffer,sizeof(double),(n1+1)*(n2+1),fp);
+
+	for(i=0;i<=n1;i++)
+	{
+		for(j=0;j<=n2;j++)
+			w[i][j]=buffer[i*(n2+1)+j];
+	}
+	fclose(fp);
+	free(buffer);
+
+	return 0;
+}
+
+//±£´æ¸÷²ã½áµãµÄÊıÄ¿
+void w_num(int n1,int n2,int n3,char*name)
+{
+	FILE *fp;
+	int *buffer = (int *)malloc(3*sizeof(int ));
+	fp=fopen(name,"wb+");
+
+	//×¼±¸Êı¾İ
+	buffer[0]=n1;
+	buffer[1]=n2;
+	buffer[2]=n3;
+
+	fwrite((char*)buffer,sizeof(int),3,fp);
+	fclose(fp);
+	free(buffer);
+}
+
+//¶ÁÈ¡¸÷²ã½áµãÊıÄ¿
+int r_num(int *n,char *name)
+{
+	int *buffer;
+	FILE *fp;
+	buffer=(int *)malloc(3*sizeof(int));
+
+	if((fp=fopen(name,"rb")) == NULL)
+	{
+		fprintf(stderr, "´ò¿ªÎÄ¼şÊ§°Ü");
+		return -1;
+	}
+
+	//¶ÁÈ¡Êı×é
+	fread((char*)buffer, sizeof(int), 3, fp);
+
+	//ËÍÈëbuffer
+	n[0]=buffer[0];
+	n[1]=buffer[1];
+	n[2]=buffer[2];
+
+	fclose(fp);
+	free(buffer);
+
+	return 0;
+}
+
+
+//ÑµÁ·Éñ¾­ÍøÂç£¬ÊäÈë²ãÓëÒş²ãÖ®¼äµÄÈ¨Öµ£¬Òş²ãÓëÊä³ö²ãÖ®¼äµÄÈ¨Öµ£¬
+int TrainBpNet(double ** data_in, double** data_out, int n_in, int n_hi, double min_ex, double learnRate, int num)	//ÑµÁ·BPÉñ¾­ÍøÂç
 {
 	//¼ÆËãÓÃ±äÁ¿
 	int c = 0, k = 0, i = 0;
-	double s = 0;
+	//double s = 0;
+	double ex = 0;		//¾ù·½Îó²î
 
 	//ÍøÂç²ÎÊı
-	int n_in = 13;	//ÊäÈë²ã½ÚµãÊı
-	int n_hi = 10;	//Òşº¬²ã½ÚµãÊı
+	//int n_in = 13;	//ÊäÈë²ã½ÚµãÊı
+	//int n_hi = 10;	//Òşº¬²ã½ÚµãÊı
 	int n_out = 4;	//Êä³ö²ã½ÚµãÊı
-	double learnRate = 0.001;	//Ñ§Ï°ÂÊ
+	//double learnRate = 0.001;	//Ñ§Ï°ÂÊ
+	double momentum = 0.1;	//¶¯Á¿Òò×Ó
 
-	double **w_input;	//ÊäÈë²ãÓëÒşº¬²ãÖ®¼äµÄÈ¨ÖµÊı×é
-	double **w_hidden;	//Òşº¬²ãÓëÊä³ö²ãÖ®¼äµÄÈ¨ÖµÊı×é
+	//È¨Öµ¾ØÕó¡¢Îó²î¾ØÕó¡¢µ±Ç°²ãÖµ¾ØÕó±äÁ¿ÉùÃ÷ÓëÄÚ´æÉêÇë
+	double **w_input = allloc_mem2d_dbl(n_hi+1, n_in+1);	//ÊäÈë²ãÓëÒşº¬²ãÖ®¼äµÄÈ¨ÖµÊı×é
+	double **w_hidden = allloc_mem2d_dbl(n_out+1, n_hi+1);	//Òşº¬²ãÓëÊä³ö²ãÖ®¼äµÄÈ¨ÖµÊı×é
+	double **w_oldInput = allloc_mem2d_dbl(n_hi+1, n_in+1);		//µ÷ÕûÈ¨ÖµÊ±ÓÃÀ´±£´æ£¬ÊäÈë²ãÓëÒşº¬²ãÖ®¼äµÄÈ¨ÖµÊı×é
+	double **w_oldHidden = allloc_mem2d_dbl(n_out+1, n_hi+1);	//µ÷ÕûÈ¨ÖµÊ±ÓÃÀ´±£´æ£¬Òşº¬²ãÓëÊä³ö²ãÖ®¼äµÄÈ¨ÖµÊı×é
 
-	double **h_delta;	//Òşº¬²ãÎó²î
-	double **o_delta;	//Êä³ö²ãÎó²î
+	double *h_delta = (double *)malloc(sizeof(double )*(n_hi+1));	//Òşº¬²ãÎó²î
+	double *o_delta = (double *)malloc(sizeof(double )*(n_out+1));	//Êä³ö²ãÎó²î
 
-	double *input;		//ÊäÈëÊı×é£¨ÏòÁ¿£©
-	double *hidden;		//Òşº¬²ãÊı×é
-	double *output;		//Êä³öÊı×é
+	double *input = (double *)malloc(sizeof(double)*(n_in+1));		//ÊäÈëÊı×é£¨ÏòÁ¿£©
+	double *hidden = (double *)malloc(sizeof(double)*(n_hi+1));		//Òşº¬²ãÊı×é
+	double *output = (double *)malloc(sizeof(double)*(n_out+1));		//Êä³öÊı×é
 
 	//Ä¿±êÊä³ö
 	double target[][4] = {	0.1,0.1,0.1,0.1,	//0
-		0.1,0.1,0.1,0.9,	//1
-		0.1,0.1,0.9,0.1,	//2
-		0.1,0.1,0.9,0.9,	//3
-		0.1,0.9,0.1,0.1,	//4
-		0.1,0.9,0.1,0.9,	//5
-		0.1,0.9,0.9,0.1,	//6
-		0.1,0.9,0.9,0.9,	//7
-		0.9,0.1,0.1,0.1,	//8
-		0.9,0.1,0.1,0.9		//9
-	};
+							0.1,0.1,0.1,0.9,	//1
+							0.1,0.1,0.9,0.1,	//2
+							0.1,0.1,0.9,0.9,	//3
+							0.1,0.9,0.1,0.1,	//4
+							0.1,0.9,0.1,0.9,	//5
+							0.1,0.9,0.9,0.1,	//6
+							0.1,0.9,0.9,0.9,	//7
+							0.9,0.1,0.1,0.1,	//8
+							0.9,0.1,0.1,0.9		//9
+						};
 
-	//ÄÚ´æÉêÇë
-
-
-	////µ÷ÓÃº¯Êı
-	//for (c = 0; c<15000; c++)
-	//{
-	//	for (k = 0; k<num; k++)
-	//	{
+	//È¨Öµ¾ØÕó³õÊ¼»¯
+	InitWeight(w_input, n_hi+1, n_in+1, 0.5);		//ÊäÈë²ãÓëÒş²ãÖ®¼äµÄÈ¨Öµ¾ØÕó
+	InitWeight(w_hidden, n_out+1, n_hi+1, 0.5);		//Òş²ãÓëÊä³ö²ãÖ®¼äµÄÈ¨Öµ¾ØÕó
 
 
-	//		//ÕıÏò´«²¥£¬input->hidden->output
-	//		ForwardLayer(input, hidden, w_input, n_in, n_hi);
-	//		ForwardLayer(hidden, output, w_hidden, n_hi, n_out);
+	//µ÷ÓÃº¯Êı
+	for (c = 0; c<15000; c++)
+	{
+		ex = 0;
+		for (k = 0; k<num; k++)
+		{
+			//½«ÌáÈ¡µÄÑù±¾µÄÌØÕ÷ÏòÁ¿ÊäËÍµ½ÊäÈë²ãÉÏ
+			for(i=1;i<=n_in;i++)
+				input[i] = data_in[k][i-1];			//½«ÌØÕ÷ÏòÁ¿µÄµ¥¸öÖµÊäÈë
 
-	//		//¼ÆËãÎó²î
-	//		CalcOutError(o_delta, output, target, n_out);
-	//		CalcHiddErr(h_delta, n_hi, o_delta, n_out, w_hidden, hidden);
+			//½«Ô¤¶¨µÄÀíÏëÊä³öÊäËÍµ½BPÍøÂçµÄÀíÏëÊä³öµ¥Ôª
+			for(i=1;i<=n_out;i++)
+				output[i] = target[k][i-1];		//½«ÀíÏëÊä³öËÎµ½Êä³ö²ã
 
-	//		for (i = 0; i<n_out; i++)
-	//		{
-	//			s += o_delta[i]*o_delta[i];		//¼ÆËã·½²î
-	//		}
+			//Ç°Ïò´«Êä¼¤»î
+			//ÕıÏò´«²¥£¬input->hidden->output
+			ForwardLayer(input, hidden, w_input, n_in, n_hi);
+			ForwardLayer(hidden, output, w_hidden, n_hi, n_out);
 
-	//		if (s <= preci)		//Èç¹û´ïµ½ÁËĞèÒªµÄ¾«¶È
-	//		{
-	//			break;
-	//		}
-	//		else	//µ÷ÕûÈ¨Öµ
-	//		{
-	//			AdjustWeight(h_delta, n_hi, input, n_in, w_input, double **oldw, learnRate, momentum);
-	//			AdjustWeight(o_delta, n_out, hidden, n_hi, w_hidden, double **oldw, learnRate, momentum);
-	//		}
-	//	}//end of num Loop
+			//¼ÆËãÎó²î
+			CalcOutError(o_delta, output, (double *)&target[k], n_out);
+			CalcHiddErr(h_delta, n_hi, o_delta, n_out, w_hidden, hidden);
 
-	//} //end of c Loop
+			for (i = 1; i<n_out; i++)
+			{
+				ex += (output[i] - target[k][i-1] ) * (output[i] - target[k][i-1] );		//¼ÆËã·½²î
+			}
 
+			if (ex <= min_ex)		//Èç¹û´ïµ½ÁËĞèÒªµÄ¾«¶È£¨·½²îĞ¡ÓÚÔ¤Éè£©
+			{
+				break;
+			}
+			else	//µ÷ÕûÈ¨Öµ
+			{
+				AdjustWeight(h_delta, n_hi, input, n_in, w_input, w_oldInput, learnRate, momentum);		//µ÷ÕûÊäÈë²ãÓëÒşº¬²ãÖ®¼äµÄÈ¨Öµ
+				AdjustWeight(o_delta, n_out, hidden, n_hi, w_hidden, w_oldHidden, learnRate, momentum);	//µ÷ÕûÒşº¬²ãÓëÊä³ö²ãÖ®¼äµÄÈ¨Öµ
+			}
+
+		}//Êı×ÖÑ­»·½áÊø
+		//¼ÆËã¾ù·½Îó²î
+		ex = ex/(double)(num*n_out);
+
+		//Èç¹û¾ù·½Îó²îÒÑ¾­×ã¹»µÄĞ¡£¬Ìø³öÑ­»·£¬ÑµÁ·Íê±Ï  
+		if(ex<min_ex)break;
+
+	}
+
+	//ÑµÁ·½áÊø
+
+	//±£´æÈ¨Öµ¾ØÕó
+
+	//±£´æÊäÈë²ãÓëÒş²ãÖ®¼äµÄÈ¨Öµ
+	w_weight(w_input,n_in,n_hi,"win.dat");
+	//±£´æÒş²ãÓëÊä³ö²ãÖ®¼äµÄÈ¨Öµ
+	w_weight(w_hidden,n_hi,n_out,"whi.dat");
+
+	//±£´æ¸÷²ã½áµãµÄ¸öÊı
+	w_num(n_in,n_hi,n_out,"num");
+
+
+	//ÊÍ·ÅÄÚ´æ
+	detect_mem2d_dbl(w_input, n_hi+1, n_in+1);
+	detect_mem2d_dbl(w_hidden, n_out+1, n_hi+1);
+	detect_mem2d_dbl(w_oldInput, n_hi+1, n_in+1);
+	detect_mem2d_dbl(w_oldHidden, n_out+1, n_hi+1);
+	//detect_mem2d_dbl(h_delta, n_hi+1, n_in+1);
+	//detect_mem2d_dbl(o_delta, n_out+1, n_hi+1);
+	free(h_delta);
+	free(o_delta);
+	free(input);
+	free(hidden);
+	free(output);
 
 	return 0;
 }
 
 //ÓÃÑµÁ·ºÃµÄÉñ¾­À´Ê¶±ğ
-int Recongnize()	//ÓÃÑµÁ·ºÃµÄÍøÂçÀ´Ê¶±ğ
+int Recongnize(double **data_in, int n_in, int n_hi, int num)	//ÓÃÑµÁ·ºÃµÄÍøÂçÀ´Ê¶±ğ
 {
+	//Ñ­»·±äÁ¿ÉùÃ÷
+	int i;
+	int k = 0;
+	int result = 0;
+	int *recognize = (int *)malloc(sizeof(int )*num);
 
+	FILE *fp = NULL;
+
+	//ÍøÂç²ÎÊı
+	int n_out = 4;
+
+	//Öµ¾ØÕóÉùÃ÷ÓëÄÚ´æ·ÖÅä
+	double *input = (double *)malloc(sizeof(double)*(n_in+1));
+	double *hidden = (double *)malloc(sizeof(double)*(n_hi+1));
+	double *output = (double *)malloc(sizeof(double)*(n_out+1));		//Êä³öÓÃ8421±àÂë£¬4Î»¶ş½øÖÆÊı
+
+	//È¨Öµ¾ØÕóÉùÃ÷Óë·ÖÅä
+	double **w_input = allloc_mem2d_dbl(n_hi+1, n_in+1);
+	double **w_hidden = allloc_mem2d_dbl(n_out+1, n_hi+1);
+
+	//¶ÁÈ¡È¨Öµ
+	if( 0 != r_weight(w_input, n_in,n_hi, "win.dat"))
+	{
+		return -1;
+	}
+	if( 0 != r_weight(w_hidden, n_hi, n_out, "whi.dat"))
+	{
+		return -1;
+	}
+
+	for (k = 0; k<num; k++)
+	{
+		//½«ÌáÈ¡µÄÑù±¾µÄÌØÕ÷ÏòÁ¿ÊäËÍµ½ÊäÈë²ãÉÏ
+		for(i=1;i<=n_in;i++)
+			input[i]=data_in[k][i-1];
+
+		//Ç°ÏòÊäÈë¼¤»î
+		ForwardLayer(input, hidden, w_input, n_in, n_hi);		//ÊäÈë²ãÓëÒşº¬²ãÖ®¼ä
+		ForwardLayer(hidden, output, w_hidden, n_hi, n_out);		//Òşº¬²ãÓëÊä³ö²ãÖ®¼ä
+
+		for (i = 1; i<n_out; i++)
+		{
+			//Èç¹û´óÓÚ0.5ÅĞÎª1
+			if(output[i] > 0.5)
+			{
+				result += (int )(pow(2, (double)(4-i)) );
+			}
+		}
+
+		//Èç¹ûÅĞ¶¨µÄ½á¹ûĞ¡ÓÚµÈÓÚ9£¬ÈÏÎªºÏÀí
+		if(result <= 9)
+		{
+			recognize[k] = result;
+		}
+
+		//Èç¹ûÅĞ¶¨µÄ½á¹û´óÓÚ9£¬ÈÏÎª²»ºÏÀí½«½á¹û¶¨Î»ÎªÒ»¸öÌØÊâÖµ20
+		if(result > 9)
+		{
+			recognize[k] = 20;
+		}
+	}//Êı×ÖÑ­»·½áÊø
+
+	//Ê¶±ğ½áÊø
+
+	//½«Ê¶±ğ½á¹ûĞ´ÈëÎÄ¼ş£¬²¢ÔÚÆÁÄ»ÉÏÏÔÊ¾³öÀ´
+	fp=fopen("result.txt","w+");
+
+	printf("Ê¶±ğ½á¹û£º\n");
+	for (i = 0; i<num; i++)
+	{
+		if (recognize[i] == 20)
+		{
+			printf("Ê¶±ğÊ§°Ü");
+			fprintf(fp, "Ê¶±ğÊ§°Ü", recognize[i]);
+		}
+		else
+		{
+			printf("%d",recognize[i]);
+			fprintf(fp, "%d",recognize[i]);
+		}
+	}
+
+	//ÊÍ·ÅÄÚ´æ
+	detect_mem2d_dbl(w_input, n_hi+1, n_in+1);
+	detect_mem2d_dbl(w_hidden, n_out+1, n_hi+1);
+	free(recognize);
+	free(input);
+	free(hidden);
+	free(output);
+
+	return result;
 }
 
 

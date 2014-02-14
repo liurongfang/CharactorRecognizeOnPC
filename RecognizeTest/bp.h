@@ -10,7 +10,20 @@
 #ifndef _MY_BPNET_
 #define _MY_BPNET_
 
+//设置结构体2个字节对齐
+#pragma pack(2)
 
+//内存分配函数
+double **allloc_mem2d_dbl(int height, int width);		//在mybmp.h中定义
+
+//释放二维数组内存
+int **detect_mem2d_dbl(double **mem, int height, int width);
+
+//激活函数：S型函数[-1,1]->[0,1]
+double squash(double x);
+
+//初始化权值矩阵
+void InitWeight(double **weight, int n2, int n1, double v);
 
 /*************************************************
 函数名称: ForwardLayer()
@@ -31,7 +44,8 @@ int ForwardLayer(double *lay1, double *lay2, double **connWeight, int n1, int n2
 写作日期: 2014/01/29 
 *************************************************/
 
-int CalcOutError(double *delta, double *输出, double *target, int n);			//输出层误差计算
+//计算输出层误差
+int CalcOutError(double *delta, double *output, double *target, int n);			//输出层误差计算
 
 /*************************************************
 函数名称: CalcHiddErr()
@@ -42,8 +56,7 @@ int CalcOutError(double *delta, double *输出, double *target, int n);			//输出层
 写作日期: 2014/01/29 
 *************************************************/
 
-void CalcHiddErr(double *delta_h, int n_h, double *delta_o, \
-					int n_o, double **weight, double *hidden);			//隐含层误差计算
+void CalcHiddErr(double *delta_h, int n_h, double *delta_o, int n_o, double **weight, double *hidden);			//隐含层误差计算
 					
 /*************************************************
 函数名称: AdjustWeight()
@@ -56,7 +69,19 @@ void CalcHiddErr(double *delta_h, int n_h, double *delta_o, \
 *************************************************/
 
 void AdjustWeight(double *delta, int n_delta, double *forwd, int n_fo, \
-				double **weight, double **oldw, double lrate, double momentum);		//误差反向传播，调整权值
+				  double **weight, double **oldw, double lrate, double momentum);		//误差反向传播，调整权值
+
+//保存权值矩阵
+void w_weight(double **w,int n1,int n2,char*name);
+
+//读取权值矩阵
+int r_weight(double **w,int n1,int n2,char *name);
+
+//保存节点数目
+void w_num(int n1,int n2,int n3,char*name);
+
+//读取节点数目
+int r_num(int *n,char *name);
 				
 				
 /*************************************************
@@ -67,7 +92,8 @@ void AdjustWeight(double *delta, int n_delta, double *forwd, int n_fo, \
 返回值: 正常返回值 0
 写作日期: 2014/01/29 
 *************************************************/
-int TrainBpNet(double preci);	//训练BP神经网络
+//训练神经网络，输入层与隐层之间的权值，隐层与输出层之间的权值
+int TrainBpNet(double ** data_in, double** data_out, int n_in, int n_hi, double min_ex, double learnRate, int num);
 
 /*************************************************
 函数名称: TrainBpNet()
@@ -77,7 +103,7 @@ int TrainBpNet(double preci);	//训练BP神经网络
 返回值: 正常返回值 0
 写作日期: 2014/01/29 
 *************************************************/
-int Recongnize();	//用训练好的网络来识别
+int Recongnize(double **data_in, int n_in, int n_hi, int num);	//用训练好的网络来识别
 				
 				
 				

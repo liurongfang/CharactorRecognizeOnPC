@@ -4,6 +4,10 @@
 #include "stdlib.h"		//system()所在
 #include "mybmp.h"		//图像处理、显示、存储，及存储空间的分配
 #include "img.h"
+#include "bp.h"
+
+//2个字节对齐方式
+#pragma pack(2)
 
 //图像的宽高
 int height = 120;	//注意！不要写反！

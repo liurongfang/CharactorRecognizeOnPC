@@ -10,7 +10,7 @@
 
 #include "stdio.h"
 #include "stdlib.h"
-#include "assert.h"
+//#include "assert.h"
 
 //断言，错误就直接返回
 //#define assert(x) ( (x)?():(return))
@@ -18,6 +18,9 @@
 
 #define TRUE (-1)		//C语言规定，0为假，非0为真，所以这里这样定义
 #define FALSE (0)
+
+//设置程序2个字节对齐
+#pragma pack(2)
 
 
 //基本数据类型定义

@@ -238,7 +238,11 @@ DRect DetectRect(UCHAR **Dst, UCHAR **Src, int srcHeight, int srcWidth)
 	int minY = srcHeight;
 	int maxY = 0;
 
-	assert(Src != NULL);		//参数检查，断言
+	//assert(Src != NULL);		//参数检查，断言
+	if (Src == NULL)
+	{
+		return;
+	}
 
 	//算法一
 	//求出X方向的极大极小坐标和Y方向的极大极小坐标，就是矩形区域
@@ -743,7 +747,7 @@ int Template(UCHAR **Dst, UCHAR **Src, int srcHeight, \
 			}
 			else	//否则，卷积
 			{
-				p = Src[i-size/2][j-size/2];		//将目标点的模板起始坐标赋给p
+				p = &Src[i-size/2][j-size/2];		//将目标点的模板起始坐标赋给p
 
 				if (p != NULL)		//防止指针出错
 				{
