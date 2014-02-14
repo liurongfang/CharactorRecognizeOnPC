@@ -13,7 +13,7 @@
 //#include "assert.h"
 
 //断言，错误就直接返回
-//#define assert(x) ( (x)?():(return))
+//#define assert(x) ( (x)?(.):(return),)
 
 
 #define TRUE (-1)		//C语言规定，0为假，非0为真，所以这里这样定义

@@ -25,6 +25,9 @@ double squash(double x);
 //初始化权值矩阵
 void InitWeight(double **weight, int n2, int n1, double v);
 
+//随机初始化权值矩阵，-1到1
+void RandomWeight(double **weight, int n2, int n1);
+
 /*************************************************
 函数名称: ForwardLayer()
 描述:  对图像进行模板操作
@@ -93,7 +96,7 @@ int r_num(int *n,char *name);
 写作日期: 2014/01/29 
 *************************************************/
 //训练神经网络，输入层与隐层之间的权值，隐层与输出层之间的权值
-int TrainBpNet(double ** data_in, double** data_out, int n_in, int n_hi, double min_ex, double learnRate, int num);
+int TrainBpNet(double ** data_in, int n_in, int n_hi, double min_ex, long max_cyc, double learnRate, int num);
 
 /*************************************************
 函数名称: TrainBpNet()
@@ -103,19 +106,10 @@ int TrainBpNet(double ** data_in, double** data_out, int n_in, int n_hi, double 
 返回值: 正常返回值 0
 写作日期: 2014/01/29 
 *************************************************/
-int Recongnize(double **data_in, int n_in, int n_hi, int num);	//用训练好的网络来识别
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
+int NumRecongnize(double **data_in, int n_in, int n_hi, int num);	//用训练好的网络来识别
+
+//测试输出权值矩阵
+void test(double **w, int n1, int n2, double *output, int n_out);
+
+
 #endif

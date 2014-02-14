@@ -239,10 +239,10 @@ DRect DetectRect(UCHAR **Dst, UCHAR **Src, int srcHeight, int srcWidth)
 	int maxY = 0;
 
 	//assert(Src != NULL);		//参数检查，断言
-	if (Src == NULL)
-	{
-		return;
-	}
+	//if (Src == NULL)
+	//{
+	//	return;
+	//}
 
 	//算法一
 	//求出X方向的极大极小坐标和Y方向的极大极小坐标，就是矩形区域
@@ -641,6 +641,7 @@ int TZTQ13(UCHAR **tz, UCHAR **Src, int srcHeight, int srcWidth, RectLink *rlink
 
 
 
+//特征提取，h+w+4个特征
 //将图像反相，0变成1,1变成0
 void InvertImg(UCHAR **Dst, UCHAR **Src , int srcHeight, int srcWidth)
 {
@@ -733,7 +734,7 @@ int Template(UCHAR **Dst, UCHAR **Src, int srcHeight, \
 	int sum = 0;
 	UCHAR *p = NULL;
 
-	assert(size%2 == 1);		//限制模板大小必须为奇数
+	//assert(size%2 == 1);		//限制模板大小必须为奇数
 
 	for (i = 0; i<srcHeight; i++)
 	{

@@ -163,7 +163,7 @@ void displayImg(UCHAR **image, int height, int width)
 				printf("%c",2);
 			}*/
 
-			printf("%2d ",image[i][j]);
+			printf("%d",image[i][j]);
 		}
 		printf("\n");
 	}
@@ -201,11 +201,11 @@ int saveImg(UCHAR **image, int height, int width, char *filename)
 			//输出到文件
 			if (0 == image[i][j] )
 			{
-				fputc(0, fp);
+				fputc(' ', fp);
 			}
 			else
 			{
-				fputc(2, fp);
+				fputc('1', fp);
 			}
 			
 			k++;

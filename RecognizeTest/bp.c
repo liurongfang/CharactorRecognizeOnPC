@@ -1,6 +1,39 @@
 #include <math.h>
+#include <time.h>
 #include "base.h"
 #include "bp.h"
+
+
+//²âÊÔÊä³öÈ¨Öµ¾ØÕó
+void test(double **w, int n1, int n2, double *output, int n_out)
+{
+	int i,j;
+	FILE *fp = fopen("C:\\Users\\Mirgo\\Desktop\\test.txt","w");
+	//fseek(fp, 0, 0);
+
+	//system("cls");
+	printf("ÏÂÃæ´òÓ¡È¨Öµ¾ØÕó\n\n");
+	for (i = 0; i<=n2; i++)
+	{
+		for (j = 0; j<=n1; j++)
+		{
+			fprintf(fp,"%0.4lf",w[i][j]);
+			printf("%4.1lf",w[i][j]);
+		}
+		fputc('\n',fp);
+		printf("\n");
+	}
+
+	for (i = n_out; i>0; i--)
+	{
+		printf("%0.2lf ",output[i]);
+	}
+	printf("\n");
+
+	fclose(fp);
+
+	//system("pause");
+}
 
 //·ÖÅä¶şÎ¬Êı×éÄÚ´æ
 double **allloc_mem2d_dbl(int height, int width)
@@ -33,7 +66,12 @@ int **detect_mem2d_dbl(double **mem, int height, int width)
 //¼¤»îº¯Êı£ºSĞÍº¯Êı[-1,1]->[0,1]
 double squash(double x)
 {
-	return 1/(1+exp(-x));
+	double ans = 0;
+	
+	ans = 1 /(1 + exp(-x ) );
+	//printf("Sqush Ans:%0.4lf\n",ans);
+
+	return ans;
 }
 
 //³õÊ¼»¯È¨Öµ¾ØÕó
@@ -50,13 +88,31 @@ void InitWeight(double **weight, int n2, int n1, double v)
 	}
 }
 
+//Ëæ»ú³õÊ¼»¯È¨Öµ¾ØÕó
+void RandomWeight(double **weight, int n2, int n1)
+{
+	int i, j;
+	//double t = 0;
+
+	srand((unsigned )time(NULL));	//ÉèÖÃËæ»úÖÖ×Ó
+
+	for (i = 0; i<n2; i++)
+	{
+		for (j = 0; j<n1; j++)
+		{
+			weight[i][j] = (double )(rand()/(double)32767 );		//²úÉúµÄÊÇ0µ½1Ö®¼äµÄËæ»úÊı
+		}
+	}
+}
+
 
 //ĞÅºÅÇ°Ïò´«²¥£¬lay1 -> lay2
 int ForwardLayer(double *lay1, double *lay2, double **connWeight, int n1, int n2)		//Ç°Ïò´«²¥
 {
 	int i,j;
 	double sum = 0;
-	lay1[0] = 1;	//X0ÉèÎª1
+	lay1[0] = 0;	//X0ÉèÎª1£¬×÷ÎªÆ«ÖÃ
+	lay2[0] = 0;	//ºóÒ»¼¶µÄX0Ò²ÖÃÎª0
 
 	//¶ÔÓÚµÚ¶ş²ãµÄÃ¿¸öÉñ¾­Ôª
 	for (i = 1; i<=n2; i++)
@@ -71,6 +127,12 @@ int ForwardLayer(double *lay1, double *lay2, double **connWeight, int n1, int n2
 
 		lay2[i] = squash(sum);		//ËÍÈë¼¤»îº¯Êı,F1(O)
 	}
+
+	//printf("Print lay2i\n");
+	//for (i = 0; i<=n2; i++)
+	//{
+	//	printf("%0.4lf\n",lay2[i]);
+	//}
 
 	return 0;
 }
@@ -96,7 +158,7 @@ int CalcOutError(double *delta, double *output, double *target, int n)			//Êä³ö²
 //delta_h Òşº¬²ãÎó²îÊı×é£¬n_h Òşº¬²ã½ÚµãÊı£¬delta_o Êä³ö²ãÎó²îÊı×é£¬n_o Êä³ö²ã½Úµã¸öÊı£¬weight Á¬½ÓÈ¨ÖµÊı×é£¬hidden Òşº¬²ã½ÚµãÊı×é
 void CalcHiddErr(double *delta_h, int n_h, double *delta_o, int n_o, double **weight, double *hidden)			//Òşº¬²ãÎó²î¼ÆËã
 {
-	int i, j;
+	int i = 0, j = 0;
 	double h, errsum;
 
 	//¶ÔÒşº¬²ãµÄÃ¿¸ö½Úµã£¬¼ÆËã¼ÓÈ¨Îó²îºÍ
@@ -105,8 +167,9 @@ void CalcHiddErr(double *delta_h, int n_h, double *delta_o, int n_o, double **we
 		errsum = 0.0;
 		h = hidden[j];
 
-		for (i = 1; i<=n_o; j++)
+		for (i = 1; i<=n_o; i++)
 		{
+			//fprintf(stderr,"*%d*",j);
 			errsum += delta_o[i] * weight[i][j];		//·´Ïò´«²¥£ºÊä³ö½ÚµãÎó²î * Á¬½ÓÈ¨Öµ
 		}
 
@@ -129,7 +192,9 @@ void AdjustWeight(double *delta, int n_delta, double *forwd, int n_fo, double **
 		for (j = 1; j<=n_fo; j++)	//±éÀúÇ°Ò»²ãµÄ½Úµã
 		{
 			//Wij_new=Ñ§Ï°Òò×Ó*Êä³ö½Úµãdelta*Ç°²ã½ÚµãµÄ¼ÆËãÊä³ö+¶¯Á¿Òò×Ó*Wij_old
-			new_w = lrate*delta[i]*forwd[j] + momentum*oldw[i][j];	
+			new_w = lrate*delta[i]*forwd[j] + momentum*oldw[i][j-1];
+			printf("NEW_W:%0.6lf== %0.6lf*%0.6lf*%0.6lf + %0.6lf*%0.6lf\n",new_w,lrate,delta[i],forwd[j],momentum,oldw[i][j-1]);
+			if (new_w == 0)	system("pause");
 			weight[i][j] += new_w;
 			oldw[i][j] = new_w;
 		}
@@ -140,20 +205,32 @@ void AdjustWeight(double *delta, int n_delta, double *forwd, int n_fo, double **
 void w_weight(double **w,int n1,int n2,char*name)
 {
 	int i,j;
-	double *buffer;
+	//double *buffer;
 	FILE *fp;
-	fp = fopen(name, "wb+");
-	buffer=(double*)malloc((n1+1)*(n2+1)*sizeof(double));
-	for(i = 0; i<=n1; i++)
+	fp = fopen(name, "w");
+	//buffer = (double *)malloc((n1+1)*(n2+1)*sizeof(double));
+
+	//for(i = 0; i<=n1; i++)
+	//{
+	//	for(j=0; j<=n2; j++)
+	//	{
+	//		buffer[i*(n2+1) + j] = w[i][j];		//°ÑÈ¨ÖµËÍÈëbuffer
+	//	}
+	//}
+
+	//fwrite((char*)buffer,sizeof(double),(n1+1)*(n2+1),fp);
+
+	for (i = 0; i<=n2; i++)
 	{
-		for(j=0; j<=n2; j++)
+		for (j = 0; j<=n1; j++)
 		{
-			buffer[i*(n2+1) + j] = w[i][j];		//°ÑÈ¨ÖµËÍÈëbuffer
+			fprintf(fp,"%8.4lf",w[i][j]);		//±£´æÊı×éµ½fp
 		}
+		fprintf(fp,"\n");
 	}
-	fwrite((char*)buffer,sizeof(double),(n1+1)*(n2+1),fp);
+
 	fclose(fp);
-	free(buffer);
+	//free(buffer);
 }
 
 
@@ -162,44 +239,61 @@ void w_weight(double **w,int n1,int n2,char*name)
 int  r_weight(double **w,int n1,int n2,char *name)
 {
 	int i,j;
-	double *buffer;
+	//double *buffer;
 	FILE *fp;
 
-	if((fp=fopen(name,"rb"))==NULL)
+	if((fp=fopen(name,"r"))==NULL)
 	{
 		fprintf(stderr, "ÎŞ·¨¶ÁÈ¡È¨ÖµĞÅÏ¢");
 		return -1;
 	}
 
-	buffer=(double*)malloc((n1+1)*(n2+1)*sizeof(double));
+	//buffer=(double*)malloc((n1+1)*(n2+1)*sizeof(double));
 
 	//´ÓÎÄ¼ş¶ÁÈ¡
-	fread((char*)buffer,sizeof(double),(n1+1)*(n2+1),fp);
+	//fread((char*)buffer,sizeof(double),(n1+1)*(n2+1),fp);
 
-	for(i=0;i<=n1;i++)
+	//for(i=0;i<=n1;i++)
+	//{
+	//	for(j=0;j<=n2;j++)
+	//		w[i][j]=buffer[i*(n2+1)+j];
+	//}
+	
+	//free(buffer);
+
+	for (i = 0; i<=n2; i++)
 	{
-		for(j=0;j<=n2;j++)
-			w[i][j]=buffer[i*(n2+1)+j];
+		for (j = 0; j<=n1; j++)
+		{
+			fscanf(fp,"%8.4lf",w[i][j]);		//´Ófp¶ÁÈ¡Êı¾İµ½wÊı×é
+		}
+		fseek(fp, 1L, 1);	//´Óµ±Ç°Î»ÖÃÌø¹ıÒ»¸ö×Ö½Ú
 	}
-	fclose(fp);
-	free(buffer);
 
+	fclose(fp);
 	return 0;
 }
 
 //±£´æ¸÷²ã½áµãµÄÊıÄ¿
 void w_num(int n1,int n2,int n3,char*name)
 {
+	int i;
 	FILE *fp;
 	int *buffer = (int *)malloc(3*sizeof(int ));
-	fp=fopen(name,"wb+");
+	fp=fopen(name,"w");
 
 	//×¼±¸Êı¾İ
 	buffer[0]=n1;
 	buffer[1]=n2;
 	buffer[2]=n3;
 
-	fwrite((char*)buffer,sizeof(int),3,fp);
+	//Ğ´Êı¾İ
+	for (i = 0; i<3; i++)
+	{
+		fprintf(fp, "%4d", buffer[i]);
+	}
+
+	//fwrite((char*)buffer,sizeof(int),3,fp);
 	fclose(fp);
 	free(buffer);
 }
@@ -233,19 +327,20 @@ int r_num(int *n,char *name)
 
 
 //ÑµÁ·Éñ¾­ÍøÂç£¬ÊäÈë²ãÓëÒş²ãÖ®¼äµÄÈ¨Öµ£¬Òş²ãÓëÊä³ö²ãÖ®¼äµÄÈ¨Öµ£¬
-int TrainBpNet(double ** data_in, double** data_out, int n_in, int n_hi, double min_ex, double learnRate, int num)	//ÑµÁ·BPÉñ¾­ÍøÂç
+int TrainBpNet(double ** data_in, int n_in, int n_hi, double min_ex, long max_cyc, double learnRate, int num)	//ÑµÁ·BPÉñ¾­ÍøÂç
 {
 	//¼ÆËãÓÃ±äÁ¿
-	int c = 0, k = 0, i = 0;
+	long c = 0;
+	int k = 0, i = 0;
 	//double s = 0;
 	double ex = 0;		//¾ù·½Îó²î
 
 	//ÍøÂç²ÎÊı
 	//int n_in = 13;	//ÊäÈë²ã½ÚµãÊı
 	//int n_hi = 10;	//Òşº¬²ã½ÚµãÊı
-	int n_out = 4;	//Êä³ö²ã½ÚµãÊı
+	int n_out = 4;		//Êä³ö²ã½ÚµãÊı
 	//double learnRate = 0.001;	//Ñ§Ï°ÂÊ
-	double momentum = 0.1;	//¶¯Á¿Òò×Ó
+	double momentum = 0.001;	//¶¯Á¿Òò×Ó
 
 	//È¨Öµ¾ØÕó¡¢Îó²î¾ØÕó¡¢µ±Ç°²ãÖµ¾ØÕó±äÁ¿ÉùÃ÷ÓëÄÚ´æÉêÇë
 	double **w_input = allloc_mem2d_dbl(n_hi+1, n_in+1);	//ÊäÈë²ãÓëÒşº¬²ãÖ®¼äµÄÈ¨ÖµÊı×é
@@ -274,12 +369,18 @@ int TrainBpNet(double ** data_in, double** data_out, int n_in, int n_hi, double 
 						};
 
 	//È¨Öµ¾ØÕó³õÊ¼»¯
-	InitWeight(w_input, n_hi+1, n_in+1, 0.5);		//ÊäÈë²ãÓëÒş²ãÖ®¼äµÄÈ¨Öµ¾ØÕó
-	InitWeight(w_hidden, n_out+1, n_hi+1, 0.5);		//Òş²ãÓëÊä³ö²ãÖ®¼äµÄÈ¨Öµ¾ØÕó
+	RandomWeight(w_input, n_hi+1, n_in+1);		//Ç°Ïò¾ØÕó³õÊ¼»¯
+	RandomWeight(w_hidden, n_out+1, n_hi+1);
+	InitWeight(w_oldInput, n_hi+1, n_in+1, 0);		//ÊäÈë²ãÓëÒş²ãÖ®¼äµÄÈ¨Öµ¾ØÕó
+	InitWeight(w_oldHidden, n_out+1, n_hi+1, 0);		//Òş²ãÓëÊä³ö²ãÖ®¼äµÄÈ¨Öµ¾ØÕó
+
+	//²âÊÔÓÃ
+	test(w_input, n_in, n_hi, output, n_out);				//²âÊÔÓÃ
+	test(w_hidden, n_hi, n_out, output, n_out);			//²âÊÔÓÃ
 
 
 	//µ÷ÓÃº¯Êı
-	for (c = 0; c<15000; c++)
+	for (c = 0; c<max_cyc; c++)
 	{
 		ex = 0;
 		for (k = 0; k<num; k++)
@@ -297,6 +398,12 @@ int TrainBpNet(double ** data_in, double** data_out, int n_in, int n_hi, double 
 			ForwardLayer(input, hidden, w_input, n_in, n_hi);
 			ForwardLayer(hidden, output, w_hidden, n_hi, n_out);
 
+			//printf("after,Print lay\n");
+			//for (i = 0; i<=n_out; i++)
+			//{
+			//	printf("%0.4lf\n",output[i]);
+			//}
+
 			//¼ÆËãÎó²î
 			CalcOutError(o_delta, output, (double *)&target[k], n_out);
 			CalcHiddErr(h_delta, n_hi, o_delta, n_out, w_hidden, hidden);
@@ -313,29 +420,45 @@ int TrainBpNet(double ** data_in, double** data_out, int n_in, int n_hi, double 
 			else	//µ÷ÕûÈ¨Öµ
 			{
 				AdjustWeight(h_delta, n_hi, input, n_in, w_input, w_oldInput, learnRate, momentum);		//µ÷ÕûÊäÈë²ãÓëÒşº¬²ãÖ®¼äµÄÈ¨Öµ
+				test(w_input, n_in, n_hi, output, n_out);				//²âÊÔÓÃ
+				if (c%20 == 0)	{printf("µÚ%d´Î\n",c); system("pause");}
 				AdjustWeight(o_delta, n_out, hidden, n_hi, w_hidden, w_oldHidden, learnRate, momentum);	//µ÷ÕûÒşº¬²ãÓëÊä³ö²ãÖ®¼äµÄÈ¨Öµ
+				test(w_hidden, n_hi, n_out, output, n_out);			//²âÊÔÓÃ
+				if (c%20 == 0)	{printf("µÚ%ld´Î\n",c); system("pause");};
 			}
 
 		}//Êı×ÖÑ­»·½áÊø
 		//¼ÆËã¾ù·½Îó²î
 		ex = ex/(double)(num*n_out);
 
-		//Èç¹û¾ù·½Îó²îÒÑ¾­×ã¹»µÄĞ¡£¬Ìø³öÑ­»·£¬ÑµÁ·Íê±Ï  
-		if(ex<min_ex)break;
+		//Èç¹û¾ù·½Îó²îÒÑ¾­×ã¹»µÄĞ¡£¬Ìø³öÑ­»·£¬ÑµÁ·Íê±Ï
+		if(ex < min_ex)
+		{
+			break;
+		}
 
 	}
 
 	//ÑµÁ·½áÊø
+	if (ex <= min_ex)
+	{
+		printf("ÑµÁ·Íê±Ï,µü´ú´ÎÊı£º%d´Î,¾ù·½Îó²î£º%0.2f\n",c,ex);
+	}
+	else
+	{
+		printf("ÑµÁ·Ê§°Ü£¡µü´ú´ÎÊı£º%d´Î,¾ù·½Îó²î£º%0.2f\n",c,ex);
+	}
+
+	//²âÊÔÓÃ
+	test(w_input, n_in, n_hi, output, n_out);				//²âÊÔÓÃ
+	test(w_hidden, n_hi, n_out, output, n_out);			//²âÊÔÓÃ
 
 	//±£´æÈ¨Öµ¾ØÕó
-
-	//±£´æÊäÈë²ãÓëÒş²ãÖ®¼äµÄÈ¨Öµ
-	w_weight(w_input,n_in,n_hi,"win.dat");
-	//±£´æÒş²ãÓëÊä³ö²ãÖ®¼äµÄÈ¨Öµ
-	w_weight(w_hidden,n_hi,n_out,"whi.dat");
+	w_weight(w_input,n_in,n_hi,"C:\\Users\\Mirgo\\Desktop\\win.dat");			//±£´æÊäÈë²ãÓëÒş²ãÖ®¼äµÄÈ¨Öµ
+	w_weight(w_hidden,n_hi,n_out,"C:\\Users\\Mirgo\\Desktop\\whi.dat");		//±£´æÒş²ãÓëÊä³ö²ãÖ®¼äµÄÈ¨Öµ
 
 	//±£´æ¸÷²ã½áµãµÄ¸öÊı
-	w_num(n_in,n_hi,n_out,"num");
+	w_num(n_in,n_hi,n_out,"C:\\Users\\Mirgo\\Desktop\\num.dat");
 
 
 	//ÊÍ·ÅÄÚ´æ
@@ -354,8 +477,8 @@ int TrainBpNet(double ** data_in, double** data_out, int n_in, int n_hi, double 
 	return 0;
 }
 
-//ÓÃÑµÁ·ºÃµÄÉñ¾­À´Ê¶±ğ
-int Recongnize(double **data_in, int n_in, int n_hi, int num)	//ÓÃÑµÁ·ºÃµÄÍøÂçÀ´Ê¶±ğ
+//ÓÃÑµÁ·ºÃµÄÉñ¾­ÍøÂçÀ´Ê¶±ğ
+int NumRecongnize(double **data_in, int n_in, int n_hi, int num)	//ÓÃÑµÁ·ºÃµÄÍøÂçÀ´Ê¶±ğ
 {
 	//Ñ­»·±äÁ¿ÉùÃ÷
 	int i;
@@ -378,11 +501,11 @@ int Recongnize(double **data_in, int n_in, int n_hi, int num)	//ÓÃÑµÁ·ºÃµÄÍøÂçÀ´
 	double **w_hidden = allloc_mem2d_dbl(n_out+1, n_hi+1);
 
 	//¶ÁÈ¡È¨Öµ
-	if( 0 != r_weight(w_input, n_in,n_hi, "win.dat"))
+	if( 0 != r_weight(w_input, n_in,n_hi, "C:\\Users\\Mirgo\\Desktop\\win.dat"))
 	{
 		return -1;
 	}
-	if( 0 != r_weight(w_hidden, n_hi, n_out, "whi.dat"))
+	if( 0 != r_weight(w_hidden, n_hi, n_out, "C:\\Users\\Mirgo\\Desktop\\whi.dat"))
 	{
 		return -1;
 	}
