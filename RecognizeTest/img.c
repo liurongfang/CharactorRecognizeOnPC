@@ -80,7 +80,7 @@ void ShowRectLink(RectLink *rlink)
 	int i = 0;
 	RectLink *p = rlink;
 
-	printf("接下来打印或的矩形区域：\n");
+	printf("接下来打印获得的矩形区域：\n");
 	do
 	{
 		printf("第%d个矩形：{%d %d %d %d}\n",i,p->data.X1,p->data.Y1,p->data.X2,p->data.Y2);

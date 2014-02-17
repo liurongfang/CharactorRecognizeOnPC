@@ -10,8 +10,8 @@
 #pragma pack(2)
 
 //Í¼ÏñµÄ¿í¸ß
-int height = 100;	//×¢Òâ£¡²»ÒªĞ´·´£¡
-int width = 600;
+int height = 120;	//×¢Òâ£¡²»ÒªĞ´·´£¡
+int width = 449;
 
 void ImageHandle(UCHAR **tz, UCHAR **img, int srcHeight, int srcWidth, int num);
 int Reconnize(UCHAR **tz, int num, int mode);		//Èç¹ûÌØÕ÷Êı¸Ä±ä£¬ĞèÒª¸Ä±äº¯ÊıÀïµÄtzCount
@@ -20,11 +20,12 @@ int Reconnize(UCHAR **tz, int num, int mode);		//Èç¹ûÌØÕ÷Êı¸Ä±ä£¬ĞèÒª¸Ä±äº¯ÊıÀïµ
 int main()
 {
 	//»ù±¾±äÁ¿¶¨Òå
-	char *filename = "C:\\Users\\Mirgo\\Desktop\\learn.bmp";		//Òª¶ÁÈ¡µÄÍ¼ÏñÎÄ¼şÂ·¾¶
+	char *filename = "C:\\Users\\Mirgo\\Desktop\\01.bmp";		//Òª¶ÁÈ¡µÄÍ¼ÏñÎÄ¼şÂ·¾¶
 	char *outfname = "C:\\Users\\Mirgo\\Desktop\\a.txt";		//Òª±£´æµÄÎÄ±¾Êı¾İÂ·¾¶
 	char *outfname2 = "C:\\Users\\Mirgo\\Desktop\\img.txt";
 	int i = 0,j;
-	int num = 10,tzCount = 13;
+	int num = 8,tzCount = 13;
+	int result = 0;
 
 	//¸ø¶şÎ¬Êı×é¶¯Ì¬·ÖÅä¿Õ¼ä
 	UCHAR **img = allloc_mem2d(height,width);
@@ -34,7 +35,7 @@ int main()
 	readBmp(img, height, width, filename);		//¶ÁÈ¡Í¼Æ¬µ½img
 	BinaryImg(img, img, height, width, 100);	//¶şÖµ»¯Í¼Ïñ
 
-	displayImg(img, height, width);			//ÏÔÊ¾img
+	//displayImg(img, height, width);			//ÏÔÊ¾img
 
 	saveImg(img, height, width, outfname2);		//±£´æÍ¼Ïñ
 
@@ -57,13 +58,14 @@ int main()
 	system("pause");
 
 	//printf("¿ªÊ¼ÑµÁ·\n");
-	Reconnize(tz, num, 1);		//¿ªÊ¼ÑµÁ·
+	//Reconnize(tz, num, 1);		//¿ªÊ¼ÑµÁ·
+	Reconnize(tz, num, 2);			//¿ªÊ¼Ê¶±ğ
 
 	system("pause");
 
 	//ÊÍ·Å¿Õ¼ä
 	delete_mem2d(img, height, width);
-	delete_mem2d(tz, num, 13);
+	delete_mem2d(tz, num, tzCount);
 
 	return 0;
 }
@@ -78,7 +80,7 @@ void ImageHandle(UCHAR **tz, UCHAR **img, int srcHeight, int srcWidth, int num)
 	int h = 0, w = 0;
 
 	//¶şÖµ»¯
-	displayImg(img, srcHeight, srcWidth);
+	//displayImg(img, srcHeight, srcWidth);
 	//BinaryImg(img, img, srcHeight, srcWidth, 100);
 	//displayImg(img, srcHeight, srcWidth);
 	
@@ -100,7 +102,7 @@ void ImageHandle(UCHAR **tz, UCHAR **img, int srcHeight, int srcWidth, int num)
 	//displayImg(img1, h, w);
 	
 	StdAlignImg(alignImg, img1, STD_H, num*STD_W, h, w, rlink, num);
-	displayImg(alignImg, STD_H, num*STD_W);
+	//displayImg(alignImg, STD_H, num*STD_W);
 	saveImg(alignImg, STD_H, num*STD_W, "C:\\Users\\Mirgo\\Desktop\\img2.txt");		//±£´æÍ¼Ïñ
 
 	ShowRectLink(rlink);	//ÏÔÊ¾µÃµ½µÄ¾ØĞÎÁ´±í
@@ -130,7 +132,7 @@ int Reconnize(UCHAR **tz, int num, int mode)
 	int n_hi = 10;
 
 	//Ê¶±ğ²ÎÊı
-	long max_cyc = 150000;		//×î´óµü´ú´ÎÊı
+	long max_cyc = 1000000;		//×î´óµü´ú´ÎÊı£¬100Íò´Î
 	double min_ex = 0.001;
 	double learnRate = 0.015;
 

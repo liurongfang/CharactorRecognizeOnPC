@@ -277,7 +277,7 @@ int  r_weight(double **w,int n1,int n2,char *name)
 		return -1;
 	}
 
-	buffer=(double * )malloc((n1+1)*(n2+1)*sizeof(double ));
+	buffer=(double*)malloc((n1+1)*(n2+1)*sizeof(double));
 
 	//从文件读取
 	fread((char*)buffer,sizeof(double),(n1+1)*(n2+1),fp);
