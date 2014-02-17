@@ -193,8 +193,8 @@ void AdjustWeight(double *delta, int n_delta, double *forwd, int n_fo, double **
 		{
 			//Wij_new=学习因子*输出节点delta*前层节点的计算输出+动量因子*Wij_old
 			new_w = lrate*delta[i]*forwd[j] + momentum*oldw[i][j-1];
-			printf("NEW_W:%0.6lf== %0.6lf*%0.6lf*%0.6lf + %0.6lf*%0.6lf\n",new_w,lrate,delta[i],forwd[j],momentum,oldw[i][j-1]);
-			if (new_w == 0)	system("pause");
+			//printf("NEW_W:%0.6lf== %0.6lf*%0.6lf*%0.6lf + %0.6lf*%0.6lf\n",new_w,lrate,delta[i],forwd[j],momentum,oldw[i][j-1]);
+			//if (new_w == 0)	system("pause");
 			weight[i][j] += new_w;
 			oldw[i][j] = new_w;
 		}
@@ -375,8 +375,8 @@ int TrainBpNet(double ** data_in, int n_in, int n_hi, double min_ex, long max_cy
 	InitWeight(w_oldHidden, n_out+1, n_hi+1, 0);		//隐层与输出层之间的权值矩阵
 
 	//测试用
-	test(w_input, n_in, n_hi, output, n_out);				//测试用
-	test(w_hidden, n_hi, n_out, output, n_out);			//测试用
+	//test(w_input, n_in, n_hi, output, n_out);				//测试用
+	//test(w_hidden, n_hi, n_out, output, n_out);			//测试用
 
 
 	//调用函数
@@ -391,7 +391,7 @@ int TrainBpNet(double ** data_in, int n_in, int n_hi, double min_ex, long max_cy
 
 			//将预定的理想输出输送到BP网络的理想输出单元
 			for(i=1;i<=n_out;i++)
-				output[i] = target[k][i-1];		//将理想输出宋到输出层
+				output[i] = target[k][i-1];		//将理想输出送到输出层
 
 			//前向传输激活
 			//正向传播，input->hidden->output
@@ -420,11 +420,11 @@ int TrainBpNet(double ** data_in, int n_in, int n_hi, double min_ex, long max_cy
 			else	//调整权值
 			{
 				AdjustWeight(h_delta, n_hi, input, n_in, w_input, w_oldInput, learnRate, momentum);		//调整输入层与隐含层之间的权值
-				test(w_input, n_in, n_hi, output, n_out);				//测试用
-				if (c%20 == 0)	{printf("第%d次\n",c); system("pause");}
+				//test(w_input, n_in, n_hi, output, n_out);				//测试用
+				//if (c%20 == 0)	{printf("第%d次\n",c); system("pause");}
 				AdjustWeight(o_delta, n_out, hidden, n_hi, w_hidden, w_oldHidden, learnRate, momentum);	//调整隐含层与输出层之间的权值
-				test(w_hidden, n_hi, n_out, output, n_out);			//测试用
-				if (c%20 == 0)	{printf("第%ld次\n",c); system("pause");};
+				//test(w_hidden, n_hi, n_out, output, n_out);			//测试用
+				//if (c%20 == 0)	{printf("第%ld次\n",c); system("pause");};
 			}
 
 		}//数字循环结束
@@ -449,9 +449,9 @@ int TrainBpNet(double ** data_in, int n_in, int n_hi, double min_ex, long max_cy
 		printf("训练失败！迭代次数：%d次,均方误差：%0.2f\n",c,ex);
 	}
 
-	//测试用
-	test(w_input, n_in, n_hi, output, n_out);				//测试用
-	test(w_hidden, n_hi, n_out, output, n_out);			//测试用
+	////测试用
+	//test(w_input, n_in, n_hi, output, n_out);				//测试用
+	//test(w_hidden, n_hi, n_out, output, n_out);			//测试用
 
 	//保存权值矩阵
 	w_weight(w_input,n_in,n_hi,"C:\\Users\\Mirgo\\Desktop\\win.dat");			//保存输入层与隐层之间的权值
