@@ -10,8 +10,8 @@
 #pragma pack(2)
 
 //Í¼ÏñµÄ¿í¸ß
-int height = 120;	//×¢Òâ£¡²»ÒªĞ´·´£¡
-int width = 449;
+int height = 100;	//×¢Òâ£¡²»ÒªĞ´·´£¡
+int width = 600;
 
 void ImageHandle(UCHAR **tz, UCHAR **img, int srcHeight, int srcWidth, int num);
 int Reconnize(UCHAR **tz, int num, int mode);		//Èç¹ûÌØÕ÷Êı¸Ä±ä£¬ĞèÒª¸Ä±äº¯ÊıÀïµÄtzCount
@@ -20,11 +20,11 @@ int Reconnize(UCHAR **tz, int num, int mode);		//Èç¹ûÌØÕ÷Êı¸Ä±ä£¬ĞèÒª¸Ä±äº¯ÊıÀïµ
 int main()
 {
 	//»ù±¾±äÁ¿¶¨Òå
-	char *filename = "C:\\Users\\Mirgo\\Desktop\\01.bmp";		//Òª¶ÁÈ¡µÄÍ¼ÏñÎÄ¼şÂ·¾¶
+	char *filename = "C:\\Users\\Mirgo\\Desktop\\test3.bmp";		//Òª¶ÁÈ¡µÄÍ¼ÏñÎÄ¼şÂ·¾¶
 	char *outfname = "C:\\Users\\Mirgo\\Desktop\\a.txt";		//Òª±£´æµÄÎÄ±¾Êı¾İÂ·¾¶
 	char *outfname2 = "C:\\Users\\Mirgo\\Desktop\\img.txt";
 	int i = 0,j;
-	int num = 8,tzCount = 13;
+	int num = 10,tzCount = 13;
 	int result = 0;
 
 	//¸ø¶şÎ¬Êı×é¶¯Ì¬·ÖÅä¿Õ¼ä
@@ -132,8 +132,8 @@ int Reconnize(UCHAR **tz, int num, int mode)
 	int n_hi = 10;
 
 	//Ê¶±ğ²ÎÊı
-	long max_cyc = 1000000;		//×î´óµü´ú´ÎÊı£¬100Íò´Î
-	double min_ex = 0.001;
+	long max_cyc = 10000000;		//×î´óµü´ú´ÎÊı£¬100Íò´Î
+	double min_ex = 0.0001;
 	double learnRate = 0.015;
 
 	double **tezheng = allloc_mem2d_dbl(num, tzCount);

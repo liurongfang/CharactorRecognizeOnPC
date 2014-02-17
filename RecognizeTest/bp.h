@@ -85,6 +85,11 @@ void w_num(int n1,int n2,int n3,char*name);
 
 //读取节点数目
 int r_num(int *n,char *name);
+
+
+
+//继续训练神经网络
+int ReTrainBpNet(double ** data_in, int n_in, int n_hi, double min_ex, long max_cyc, double learnRate, int num);
 				
 				
 /*************************************************
