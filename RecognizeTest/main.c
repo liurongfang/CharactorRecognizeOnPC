@@ -6,6 +6,7 @@
 #include "img.h"
 #include "bp.h"
 
+
 //2¸ö×Ö½Ú¶ÔÆë·½Ê½
 #pragma pack(2)
 
@@ -20,7 +21,7 @@ int Reconnize(UCHAR **tz, int num, int mode);		//Èç¹ûÌØÕ÷Êı¸Ä±ä£¬ĞèÒª¸Ä±äº¯ÊıÀïµ
 int main()
 {
 	//»ù±¾±äÁ¿¶¨Òå
-	char *filename = "C:\\Users\\Mirgo\\Desktop\\test3.bmp";		//Òª¶ÁÈ¡µÄÍ¼ÏñÎÄ¼şÂ·¾¶
+	char *filename = "C:\\Users\\Mirgo\\Desktop\\test2.bmp";		//Òª¶ÁÈ¡µÄÍ¼ÏñÎÄ¼şÂ·¾¶
 	char *outfname = "C:\\Users\\Mirgo\\Desktop\\a.txt";		//Òª±£´æµÄÎÄ±¾Êı¾İÂ·¾¶
 	char *outfname2 = "C:\\Users\\Mirgo\\Desktop\\img.txt";
 	int i = 0,j;
@@ -30,6 +31,7 @@ int main()
 	//¸ø¶şÎ¬Êı×é¶¯Ì¬·ÖÅä¿Õ¼ä
 	UCHAR **img = allloc_mem2d(height,width);
 	UCHAR **tz = allloc_mem2d(num,tzCount);
+
 
 	//¿ªÊ¼
 	readBmp(img, height, width, filename);		//¶ÁÈ¡Í¼Æ¬µ½img
