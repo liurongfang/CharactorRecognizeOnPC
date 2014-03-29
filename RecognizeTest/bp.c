@@ -1,7 +1,12 @@
+
+
+
 #include <math.h>
 #include <time.h>
 #include "base.h"
 #include "bp.h"
+
+#pragma pack(2)
 
 
 //测试输出权值矩阵
@@ -268,7 +273,7 @@ void w_weight(double **w,int n1,int n2,char*name)
 int  r_weight(double **w,int n1,int n2,char *name)
 {
 	int i,j;
-	double *buffer;
+//	double *buffer;
 	FILE *fp;
 
 	if((fp=fopen(name,"r"))==NULL)
@@ -355,11 +360,11 @@ int r_num(int *n,char *name)
 }
 
 //继续训练神经网络
-int ReTrainBpNet(double ** data_in, int n_in, int n_hi, double min_ex, long max_cyc, double learnRate, int num)
+int RxTrainBpNet(double ***data_in, int n_in, int n_hi, double min_ex, long max_cyc, double learnRate, int num)
 {
 	//计算用变量
 	long c = 0;
-	int k = 0, i = 0;
+	int k = 0, i = 0, sheet = 0;
 	double ex = 0;		//均方误差
 
 	//网络参数
@@ -407,64 +412,70 @@ int ReTrainBpNet(double ** data_in, int n_in, int n_hi, double min_ex, long max_
 
 
 	//调用函数
-	for (c = 0; c<max_cyc; c++)
+	for (c = 0; c<max_cyc; c++)		//不大于最大训练次数
 	{
 		ex = 0;
-		for (k = 0; k<num; k++)
+		for (sheet = 0; sheet<5; sheet++)
 		{
-			//将提取的样本的特征向量输送到输入层上
-			for(i=1;i<=n_in;i++)
-				input[i] = data_in[k][i-1];			//将特征向量的单个值输入
-
-			//将预定的理想输出输送到BP网络的理想输出单元
-			for(i=1;i<=n_out;i++)
-				output[i] = target[k][i-1];		//将理想输出送到输出层
-
-			//前向传输激活
-			//正向传播，input->hidden->output
-			ForwardLayer(input, hidden, w_input, n_in, n_hi);
-			ForwardLayer(hidden, output, w_hidden, n_hi, n_out);
-
-			//printf("after,Print lay\n");
-			//for (i = 0; i<=n_out; i++)
-			//{
-			//	printf("%0.4lf\n",output[i]);
-			//}
-
-			//计算误差
-			//if (k == 9)
-			//{
-			//	system("pause");
-			//}
-			CalcOutError(o_delta, output, (double *)&target[k], n_out);
-			CalcHiddErr(h_delta, n_hi, o_delta, n_out, w_hidden, hidden);
-
-			for (i = 1; i<n_out; i++)
+			for (k = 0; k<num; k++)
 			{
-				ex += (output[i] - target[k][i-1] ) * (output[i] - target[k][i-1] );		//计算方差
-			}
+				//将提取的样本的特征向量输送到输入层上
+				for(i=1;i<=n_in;i++)
+					input[i] = data_in[sheet][k][i-1];			//将特征向量的单个值输入
 
-			if (ex <= min_ex)		//如果达到了需要的精度（方差小于预设）
-			{
-				break;
-			}
-			else	//调整权值
-			{
-				//if (k == 8) system("pause");
-				AdjustWeight(h_delta, n_hi, input, n_in, w_input, w_oldInput, learnRate, momentum);		//调整输入层与隐含层之间的权值
-				//test(w_input, n_in, n_hi, output, n_out);				//测试用
-				AdjustWeight(o_delta, n_out, hidden, n_hi, w_hidden, w_oldHidden, learnRate, momentum);	//调整隐含层与输出层之间的权值
-				//test(w_hidden, n_hi, n_out, output, n_out);			//测试用
-				//if (c%2 == 0)
+				//将预定的理想输出输送到BP网络的理想输出单元
+				for(i=1;i<=n_out;i++)
+					output[i] = target[k][i-1];		//将理想输出送到输出层
+
+				//前向传输激活
+				//正向传播，input->hidden->output
+				ForwardLayer(input, hidden, w_input, n_in, n_hi);
+				ForwardLayer(hidden, output, w_hidden, n_hi, n_out);
+
+				//printf("after,Print lay\n");
+				//for (i = 0; i<=n_out; i++)
 				//{
-				//	printf("数字%d,第%d次\n",k,c);
-				//	//system("pause");
-				//	//system("cls");
-				//	//system("pause");
+				//	printf("%0.4lf\n",output[i]);
 				//}
-			}
 
-		}//数字循环结束
+				//计算误差
+				//if (k == 9)
+				//{
+				//	system("pause");
+				//}
+				CalcOutError(o_delta, output, (double *)&target[k], n_out);
+				CalcHiddErr(h_delta, n_hi, o_delta, n_out, w_hidden, hidden);
+
+				for (i = 1; i<n_out; i++)
+				{
+					ex += (output[i] - target[k][i-1] ) * (output[i] - target[k][i-1] );		//计算方差
+				}
+
+				if (ex <= min_ex)		//如果达到了需要的精度（方差小于预设）
+				{
+					break;
+				}
+				else	//调整权值
+				{
+					//if (k == 8) system("pause");
+					AdjustWeight(h_delta, n_hi, input, n_in, w_input, w_oldInput, learnRate, momentum);		//调整输入层与隐含层之间的权值
+					//test(w_input, n_in, n_hi, output, n_out);				//测试用
+					AdjustWeight(o_delta, n_out, hidden, n_hi, w_hidden, w_oldHidden, learnRate, momentum);	//调整隐含层与输出层之间的权值
+					//test(w_hidden, n_hi, n_out, output, n_out);			//测试用
+					//if (c%2 == 0)
+					//{
+					//	printf("数字%d,第%d次\n",k,c);
+					//	//system("pause");
+					//	//system("cls");
+					//	//system("pause");
+					//}
+				}
+
+
+			}//num个数字循环结束
+		}
+
+
 		//计算均方误差
 		ex = ex/(double)(num*n_out);
 

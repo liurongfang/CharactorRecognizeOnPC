@@ -88,8 +88,8 @@ int r_num(int *n,char *name);
 
 
 
-//继续训练神经网络
-int ReTrainBpNet(double ** data_in, int n_in, int n_hi, double min_ex, long max_cyc, double learnRate, int num);
+//多次训练神经网络
+int RxTrainBpNet(double ***data_in, int n_in, int n_hi, double min_ex, long max_cyc, double learnRate, int num);
 				
 				
 /*************************************************
@@ -114,7 +114,9 @@ int TrainBpNet(double ** data_in, int n_in, int n_hi, double min_ex, long max_cy
 int NumRecongnize(double **data_in, int n_in, int n_hi, int num);	//用训练好的网络来识别
 
 //测试输出权值矩阵
-void test(double **w, int n1, int n2, double *output, int n_out);
+//void test(double **w, int n1, int n2, double *output, int n_out);
 
 
 #endif
+
+

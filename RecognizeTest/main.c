@@ -16,58 +16,79 @@ int width = 600;
 
 void ImageHandle(UCHAR **tz, UCHAR **img, int srcHeight, int srcWidth, int num);
 int Reconnize(UCHAR **tz, int num, int mode);		//如果特征数改变，需要改变函数里的tzCount
+void TrainIt(UCHAR ***tz, int num);			//多幅图像特征的训练
+int ReadTxtAsImg(UCHAR **image, int height, int width, char *filename);			//将文本读成图像数组
 
 //主函数
 int main()
 {
 	//基本变量定义
-	char *filename = "C:\\Users\\Mirgo\\Desktop\\test2.bmp";		//要读取的图像文件路径
+	char *filename[5] = {"C:\\Users\\Mirgo\\Desktop\\learn0.txt",
+						"C:\\Users\\Mirgo\\Desktop\\learn1.txt",
+						"C:\\Users\\Mirgo\\Desktop\\learn2.txt",
+						"C:\\Users\\Mirgo\\Desktop\\learn3.txt",
+						"C:\\Users\\Mirgo\\Desktop\\learn4.txt"};		//要读取的图像文件路径,5幅图像，每幅含有数字10个
 	char *outfname = "C:\\Users\\Mirgo\\Desktop\\a.txt";		//要保存的文本数据路径
 	char *outfname2 = "C:\\Users\\Mirgo\\Desktop\\img.txt";
-	int i = 0,j;
-	int num = 10,tzCount = 13;
+	UCHAR ***tz = NULL;
+	int i = 0,j,k;
+	int num = 10, tzCount = 13;
 	int result = 0;
 
 	//给二维数组动态分配空间
-	UCHAR **img = allloc_mem2d(height,width);
-	UCHAR **tz = allloc_mem2d(num,tzCount);
-
-
-	//开始
-	readBmp(img, height, width, filename);		//读取图片到img
-	BinaryImg(img, img, height, width, 100);	//二值化图像
-
-	//displayImg(img, height, width);			//显示img
-
-	saveImg(img, height, width, outfname2);		//保存图像
-
-	//暂停，等待按键
-	//system("pause");
-
-	ImageHandle(tz, img, height, width, num);
-	printf("分别8块像素和、总像素和、水平两条、竖直两条\n");
-	//displayImg(tz, num, 13);
-	for (i = 0; i<num; i++)
+	UCHAR **img = allloc_mem2d(height,width);	//保存读取到的图像
+	for (i = 0; i<5; i++)		//分配5个特征矩阵空间
 	{
-		for (j = 0; j<tzCount; j++)
-		{
-			printf("%3d ",tz[i][j]);
-		}
-		printf("\n");
+		tz[i] = allloc_mem2d(num,tzCount);
 	}
+
+
+	for (k = 0; k<5; k++)
+	{
+		//开始
+		ReadTxtAsImg(img, height, width, filename[k]);		//读取图片到img
+		BinaryImg(img, img, height, width, 100);	//二值化图像
+
+		//displayImg(img, height, width);			//显示img
+
+		saveImg(img, height, width, outfname2);		//保存图像
+
+		//暂停，等待按键
+		//system("pause");
+
+		ImageHandle(tz[k], img, height, width, num);
+
+		printf("分别8块像素和、总像素和、水平两条、竖直两条\n");
+		displayImg(tz[k], num, 13);
+
+		for (i = 0; i<num; i++)
+		{
+			for (j = 0; j<tzCount; j++)
+			{
+				printf("%3d ",tz[k][i][j]);
+			}
+			printf("\n");
+		}
+	}
+
+
 
 	//printf("ImageHandle OK!\n");
 	system("pause");
 
 	//printf("开始训练\n");
 	//Reconnize(tz, num, 1);		//开始训练
-	Reconnize(tz, num, 2);			//开始识别
+	TrainIt(tz, num);				//训练
+	//Reconnize(tz, num, 2);		//开始识别
 
 	system("pause");
 
 	//释放空间
 	delete_mem2d(img, height, width);
-	delete_mem2d(tz, num, tzCount);
+	for (k = 0; k<5; k++)
+	{
+		delete_mem2d(tz[k], num, tzCount);
+	}
 
 	return 0;
 }
@@ -119,7 +140,7 @@ void ImageHandle(UCHAR **tz, UCHAR **img, int srcHeight, int srcWidth, int num)
 
 }
 
-//识别处理
+//识别处理&单幅图像特征的训练
 int Reconnize(UCHAR **tz, int num, int mode)
 {
 	//循环变量
@@ -161,20 +182,111 @@ int Reconnize(UCHAR **tz, int num, int mode)
 		}
 	}
 
-	//
+
 	if (mode == 1)		//模式1，训练模式
 	{
-		TrainBpNet(tezheng, n_in, n_hi, min_ex, max_cyc, learnRate, num);
+		TrainBpNet(tezheng, n_in, n_hi, min_ex, max_cyc, learnRate, num);		//一次训练一幅图像
 	}
 	else
 	if (mode == 2)		//模式2，识别模式
 	{
 		result = NumRecongnize(tezheng, n_in, n_hi, num);
-
 	}
+	
 
 	//释放空间
 	detect_mem2d_dbl(tezheng, num, tzCount);
 
 	return result;
+}
+
+//多幅图像特征的训练
+void TrainIt(UCHAR ***tz, int num)
+{
+	//循环变量
+	int i, j, k;
+	int tzCount = 13;		//每个字符的特征数
+
+	//识别结果
+	int result = 0;
+
+	//网络参数
+	int n_in = 13;	
+	int n_hi = 10;
+
+	//识别参数
+	long max_cyc = 150000;		//最大迭代次数，15w次
+	double min_ex = 0.0001;
+	double learnRate = 0.015;
+
+	double ***tezheng =NULL;
+	double min = 99999,max = 0;			//分别记录特征矩阵中的最大最小值
+
+	for (i = 0; i<5; i++)
+	{
+		tezheng[i] = allloc_mem2d_dbl(num, tzCount);
+	}
+
+	//预处理，将UCHAR **tz变成double **tz
+	for (k = 0; k<5; k++)
+	{
+		for (i = 0; i<num; i++)
+		{
+			for (j = 0; j<tzCount; j++)
+			{
+				tezheng[k][i][j] = (double)tz[k][i][j];		//强制转换为double型
+				if (tezheng[k][i][j] > max) max = tezheng[k][i][j];		//更新最大值、最小值
+				if (tezheng[k][i][j] < min) min = tezheng[k][i][j];
+			}
+		}
+	}
+	
+
+	//将特征矩阵归一化到0和1之间
+	for (k = 0; k<5; k++)
+	{
+		for (i = 0; i<num; i++)
+		{
+			for (j = 0; j<tzCount; j++)
+			{
+				tezheng[k][i][j] = (tezheng[k][i][j] - min + 1 )/(max - min + 1);		//归一化到0和1之间，加1是防止分母为0
+			}
+		}
+	}
+
+	//开始训练
+	RxTrainBpNet(tezheng, n_in, n_hi, min_ex, max_cyc, learnRate, num);		//一次训练多幅图像
+
+	//释放空间
+	for (k = 0; k<5; k++)
+	{
+		detect_mem2d_dbl(tezheng[k], num, tzCount);
+	}
+	
+}
+
+//将文本读成图像数组
+int ReadTxtAsImg(UCHAR **image, int height, int width, char *filename)
+{
+	int i,j;
+	FILE *fp = NULL;
+
+	if ((fp  = fopen(filename, "r")) == NULL )
+	{
+		printf("file not found,please check dir:%s\n",filename);
+		return -1;
+	}
+
+	//从文本读取
+	for (i = 0; i<height; i++)
+	{
+		for (j = 0; j<width; j++)
+		{
+			 fscanf(fp, "%d", &image[i][j]);
+		}
+	}
+
+	fclose(fp);
+
+	return 0;
 }
